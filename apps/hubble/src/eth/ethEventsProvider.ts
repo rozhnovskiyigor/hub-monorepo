@@ -51,10 +51,10 @@ export class EthEventsProvider {
 
   private _lastBlockNumber: number;
 
-  private _watchNameRegistryTransfers: WatchContractEvent<typeof NameRegistry.abi, 'Transfer'>;
-  private _watchNameRegistryRenews: WatchContractEvent<typeof NameRegistry.abi, 'Renew'>;
-  private _watchIdRegistryRegisters: WatchContractEvent<typeof IdRegistry.abi, 'Register'>;
-  private _watchIdRegistryTransfers: WatchContractEvent<typeof IdRegistry.abi, 'Transfer'>;
+  private _watchNameRegistryTransfers: WatchContractEvent<typeof NameRegistry.abi, 'Transfer', true>;
+  private _watchNameRegistryRenews: WatchContractEvent<typeof NameRegistry.abi, 'Renew', true>;
+  private _watchIdRegistryRegisters: WatchContractEvent<typeof IdRegistry.abi, 'Register', true>;
+  private _watchIdRegistryTransfers: WatchContractEvent<typeof IdRegistry.abi, 'Transfer', true>;
   private _watchBlockNumber: WatchBlockNumber;
 
   // Whether the historical events have been synced. This is used to avoid syncing the events multiple times.
@@ -104,6 +104,7 @@ export class EthEventsProvider {
         eventName: 'Register',
         onLogs: this.processIdRegisterEvents.bind(this),
         pollingInterval: EthEventsProvider.eventPollingInterval,
+        strict: true,
       },
       'IdRegistry Register'
     );
@@ -116,6 +117,7 @@ export class EthEventsProvider {
         eventName: 'Transfer',
         onLogs: this.processIdTransferEvents.bind(this),
         pollingInterval: EthEventsProvider.eventPollingInterval,
+        strict: true,
       },
       'IdRegistry Transfer'
     );
@@ -129,6 +131,7 @@ export class EthEventsProvider {
         eventName: 'Transfer' as const,
         onLogs: this.processNameTransferEvents.bind(this),
         pollingInterval: EthEventsProvider.eventPollingInterval,
+        strict: true,
       },
       'NameRegistry Transfer'
     );
@@ -141,6 +144,7 @@ export class EthEventsProvider {
         eventName: 'Renew',
         onLogs: this.processNameRenewEvents.bind(this),
         pollingInterval: EthEventsProvider.eventPollingInterval,
+        strict: true,
       },
       'NameRegistry Renew'
     );
@@ -336,6 +340,7 @@ export class EthEventsProvider {
           eventName: 'Register',
           fromBlock: BigInt(nextFromBlock),
           toBlock: BigInt(nextToBlock),
+          strict: true,
         });
 
         const logs = await this._publicClient.getFilterLogs({ filter });
@@ -347,6 +352,7 @@ export class EthEventsProvider {
           eventName: 'Transfer',
           fromBlock: BigInt(nextFromBlock),
           toBlock: BigInt(nextToBlock),
+          strict: true,
         });
 
         const logs = await this._publicClient.getFilterLogs({ filter });
@@ -401,6 +407,7 @@ export class EthEventsProvider {
           eventName: 'Transfer',
           fromBlock: BigInt(nextFromBlock),
           toBlock: BigInt(nextToBlock),
+          strict: true,
         });
 
         const logs = await this._publicClient.getFilterLogs({ filter });
@@ -409,7 +416,9 @@ export class EthEventsProvider {
     }
   }
 
-  private async processIdTransferEvents(logs: Log<bigint, number, undefined, typeof IdRegistry.abi, 'Transfer'>[]) {
+  private async processIdTransferEvents(
+    logs: Log<bigint, number, undefined, true, typeof IdRegistry.abi, 'Transfer'>[]
+  ) {
     for (const event of logs) {
       const { blockNumber, blockHash, transactionHash, transactionIndex } = event;
 
@@ -439,7 +448,9 @@ export class EthEventsProvider {
     }
   }
 
-  private async processIdRegisterEvents(logs: Log<bigint, number, undefined, typeof IdRegistry.abi, 'Register'>[]) {
+  private async processIdRegisterEvents(
+    logs: Log<bigint, number, undefined, true, typeof IdRegistry.abi, 'Register'>[]
+  ) {
     for (const event of logs) {
       const { blockNumber, blockHash, transactionHash, transactionIndex } = event;
 
@@ -469,7 +480,9 @@ export class EthEventsProvider {
     }
   }
 
-  private async processNameTransferEvents(logs: Log<bigint, number, undefined, typeof NameRegistry.abi, 'Transfer'>[]) {
+  private async processNameTransferEvents(
+    logs: Log<bigint, number, undefined, true, typeof NameRegistry.abi, 'Transfer'>[]
+  ) {
     for (const event of logs) {
       const { blockNumber, blockHash, transactionHash, transactionIndex } = event;
 
@@ -498,7 +511,7 @@ export class EthEventsProvider {
     }
   }
 
-  private async processNameRenewEvents(logs: Log<bigint, number, undefined, typeof NameRegistry.abi, 'Renew'>[]) {
+  private async processNameRenewEvents(logs: Log<bigint, number, undefined, true, typeof NameRegistry.abi, 'Renew'>[]) {
     for (const event of logs) {
       const { blockNumber, blockHash, transactionHash, transactionIndex } = event;
 
